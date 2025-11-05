@@ -6,3 +6,6 @@ def test_subtraction():
 
 def test_success_example():
     assert 2 * 2 == 4  # This will succeed now
+
+def test_failure_example():
+    assert 2 * 2 == 5 # This will fail now
