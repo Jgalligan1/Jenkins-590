@@ -13,7 +13,7 @@ pipeline {
         stage('Run tests') {
             steps {
                 // Run pytest and generate a JUnit XML report
-                sh './venv/bin/pytest --junitxml=report.xml'
+                sh './venv/bin/pytest --junitxml=report.xml --cov=. --cov-report=xml'
             }
         }
 
@@ -21,7 +21,24 @@ pipeline {
             steps {
                 // Publish the test results in Jenkins
                 junit 'report.xml'
+                publishCoverage adapters: [coberturaAdapter('coverage.xml')]
             }
+        }
+    }
+    post {
+        failure {
+            slackSend(
+                channel: '#ci-alerts',
+                color: 'danger',
+                message: "Jenkins build FAILED for ${env.JOB_NAME} [${env.BUILD_NUMBER}]\n${env.BUILD_URL}"
+            )
+        }
+        success {
+            slackSend(
+                channel: '#ci-alerts',
+                color: 'good',
+                message: "Jenkins build PASSED for ${env.JOB_NAME} [${env.BUILD_NUMBER}]\n${env.BUILD_URL}"
+            )
         }
     }
 }
